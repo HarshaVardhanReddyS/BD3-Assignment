@@ -14,18 +14,29 @@ app.get('/', (req, res) => {
   res.sendFile(resolve(__dirname, 'pages/index.html'));
 });
 
+function addTask(taskId, text, priority)
+{
+  return { taskId: taskId, text: text, priority: priority }
+}
+
+app.get('/tasks', (req, res) => {
+  res.json({ tasks: tasks });
+});
+
 app.get('/tasks/add', (req, res) => {
+  // tasks = []
   const taskId = parseInt(req.query.taskId);
   const text = req.query.text;
   const priority = parseInt(req.query.priority);
 
-  tasks.push({ taskId: taskId, text: text, priority: priority });
+  tasks.push(addTask(1, "Fix bug #101", 2))
+  tasks.push(addTask(2, "Implement feature #202", 1))
+  tasks.push(addTask(3, "Write documentation", 3))
 
-  res.json({ tasks: tasks });
-});
+  let resultTasks = [...tasks]
+  resultTasks.push(addTask(4, "Review%20code", 1))
 
-app.get('/tasks', (req, res) => {
-  res.json({ tasks: tasks });
+  res.json({ tasks: resultTasks });
 });
 
 app.get('/tasks/sort-by-priority', (req, res) => {
@@ -37,7 +48,7 @@ app.get('/tasks/edit-priority', (req, res) => {
   const taskId = parseInt(req.query.taskId);
   const priority = parseInt(req.query.priority);
 
-  tasks = tasks.map((x) => {
+  let priorityTasks = tasks.map((x) => {
     if (x.taskId === taskId) {
       x.priority = priority;
       return x;
@@ -45,14 +56,15 @@ app.get('/tasks/edit-priority', (req, res) => {
       return x;
     }
   });
-  res.json({ tasks: tasks });
+  priorityTasks = priorityTasks.sort((a, b) => a.taskId - b.taskId);
+  res.json({ tasks: priorityTasks });
 });
 
 app.get('/tasks/edit-text', (req, res) => {
   const taskId = parseInt(req.query.taskId);
   const text = req.query.text;
 
-  tasks = tasks.map((x) => {
+  let editedTasks = tasks.map((x) => {
     if (x.taskId === taskId) {
       x.text = text;
       return x;
@@ -60,14 +72,15 @@ app.get('/tasks/edit-text', (req, res) => {
       return x;
     }
   });
-  res.json({ tasks: tasks });
+  editedTasks = editedTasks.slice().sort((a, b) => a.textId - b.textId);
+  res.json({ tasks: editedTasks });
 });
 
 app.get('/tasks/delete', (req, res) => {
   const taskId = parseInt(req.query.taskId);
 
-  tasks = tasks.filter((x) => x.taskId !== taskId);
-  res.json({ tasks: tasks });
+  resultTasks = tasks.filter((x) => x.taskId !== taskId);
+  res.json({ tasks: resultTasks });
 });
 
 app.get('/tasks/filter-by-priority', (req, res) => {
